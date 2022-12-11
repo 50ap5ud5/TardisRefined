@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Material;
 import whocraft.tardis_refined.TardisRefined;
 import whocraft.tardis_refined.common.block.console.GlobalConsoleBlock;
+import whocraft.tardis_refined.common.block.device.AirLockGenerationBlock;
 import whocraft.tardis_refined.common.block.door.BulkHeadDoorBlock;
 import whocraft.tardis_refined.common.block.door.GlobalDoorBlock;
 import whocraft.tardis_refined.common.block.door.InternalDoorBlock;
@@ -75,7 +76,7 @@ public class BlockRegistry {
 
     // Devices
     public static final RegistrySupplier<TerraformerBlock> TERRAFORMER_BLOCK = register("terraformer", () -> new TerraformerBlock(BlockBehaviour.Properties.of(Material.METAL).strength(3,3).sound(SoundType.ANVIL).noOcclusion()), ItemRegistry.MAIN_TAB, true);
-
+    public static final RegistrySupplier<AirLockGenerationBlock> AIR_LOCK_GENERATION_BLOCK = register("air_lock_generator", () -> new AirLockGenerationBlock(BlockBehaviour.Properties.of(Material.METAL).strength(3, 3).sound(SoundType.ANVIL).noOcclusion()), null, true);
     // Console
     public static final RegistrySupplier<GlobalConsoleBlock> GLOBAL_CONSOLE_BLOCK = register("tardis_console", () -> new GlobalConsoleBlock(BlockBehaviour.Properties.of(Material.METAL).strength(1000,1000).sound(SoundType.ANVIL).noOcclusion().lightLevel((x) -> {
         return 15;

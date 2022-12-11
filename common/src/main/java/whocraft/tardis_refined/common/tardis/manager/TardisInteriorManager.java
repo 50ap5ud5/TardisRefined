@@ -127,88 +127,90 @@ public class TardisInteriorManager {
         }
 
 
-        /// Airlock Logic
+        if (corridorAirlockCenter != null) {
+            // Airlock Logic
 
-        BlockPos staticCorridorCenter = new BlockPos(1000,100,0);
+            BlockPos staticCorridorCenter = new BlockPos(1000,100,0);
 
-        // Check if a player is in the radius of either airlock points
-        if (!processingWarping) {
-            if (level.getGameTime() % 20 == 0) {
-                // Dynamic desktop position.
-                List<LivingEntity> desktopEntities = level.getEntitiesOfClass(LivingEntity.class, new AABB(corridorAirlockCenter.north(2).west(2), corridorAirlockCenter.south(2).east(2).above(4)));
-                List<LivingEntity> corridorEntities = level.getEntitiesOfClass(LivingEntity.class, new AABB(staticCorridorCenter.north(2).west(2), staticCorridorCenter.south(2).east(2).above(4)));
+            // Check if a player is in the radius of either airlock points
+            if (!processingWarping) {
+                if (level.getGameTime() % 20 == 0) {
+                    // Dynamic desktop position.
+                    List<LivingEntity> desktopEntities = level.getEntitiesOfClass(LivingEntity.class, new AABB(corridorAirlockCenter.north(2).west(2), corridorAirlockCenter.south(2).east(2).above(4)));
+                    List<LivingEntity> corridorEntities = level.getEntitiesOfClass(LivingEntity.class, new AABB(staticCorridorCenter.north(2).west(2), staticCorridorCenter.south(2).east(2).above(4)));
 
-                if (desktopEntities.size() > 0 || corridorEntities.size() > 0) {
-                    airlockCountdownSeconds--;
-                    if (airlockCountdownSeconds <=0 ) {
+                    if (desktopEntities.size() > 0 || corridorEntities.size() > 0) {
+                        airlockCountdownSeconds--;
+                        if (airlockCountdownSeconds <=0 ) {
 
-                        this.processingWarping = true;
-                        airlockCountdownSeconds = 20;
+                            this.processingWarping = true;
+                            airlockCountdownSeconds = 20;
+                            this.airlockTimerSeconds = 0;
+
+                            // Lock the doors.
+                            BlockPos desktopDoorPos = corridorAirlockCenter.north(2);
+                            if (level.getBlockEntity(desktopDoorPos) instanceof BulkHeadDoorBlockEntity bulkHeadDoorBlockEntity) {
+                                bulkHeadDoorBlockEntity.closeDoor(level, desktopDoorPos, level.getBlockState(desktopDoorPos));
+                                level.setBlock(desktopDoorPos, level.getBlockState(desktopDoorPos).setValue(BulkHeadDoorBlock.LOCKED, true), 2);
+                            }
+
+                            BlockPos corridorDoorBlockPos = new BlockPos(1000,100,2);
+                            if (level.getBlockEntity(corridorDoorBlockPos) instanceof BulkHeadDoorBlockEntity bulkHeadDoorBlockEntity) {
+                                bulkHeadDoorBlockEntity.closeDoor(level, corridorDoorBlockPos, level.getBlockState(corridorDoorBlockPos));
+                                level.setBlock(corridorDoorBlockPos, level.getBlockState(corridorDoorBlockPos).setValue(BulkHeadDoorBlock.LOCKED, true), 2);
+                            }
+                        }
+                    } else {
+                        this.processingWarping = false;
+                        this.airlockCountdownSeconds = 6;
                         this.airlockTimerSeconds = 0;
+                    }
 
-                        // Lock the doors.
+                }
+            }
+
+            if (processingWarping) {
+                if (level.getGameTime() % 20 == 0) {
+                    if (airlockTimerSeconds == 2) {
+                        level.playSound(null, corridorAirlockCenter, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 5, 0.25f);
+                        level.playSound(null, staticCorridorCenter, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 5, 0.25f);
+                    }
+
+                    if (airlockTimerSeconds == 10) {
+                        List<LivingEntity> desktopEntities = level.getEntitiesOfClass(LivingEntity.class, new AABB(corridorAirlockCenter.north(2).west(2), corridorAirlockCenter.south(2).east(2).above(4)));
+                        List<LivingEntity> corridorEntities = level.getEntitiesOfClass(LivingEntity.class, new AABB(staticCorridorCenter.north(2).west(2), staticCorridorCenter.south(2).east(2).above(4)));
+
+                        desktopEntities.forEach(x -> {
+                            Vec3 offsetPos = x.position().subtract(Vec3.atCenterOf(corridorAirlockCenter.north(2))) ;
+                            x.teleportTo(1000.5f + offsetPos.x(), 100.5f + offsetPos.y(), -1.5f + offsetPos.z());
+                        });
+
+                        corridorEntities.forEach(x -> {
+                            Vec3 offsetPos = x.position().subtract(Vec3.atCenterOf(new BlockPos(1000, 100, -2))) ;
+                            x.teleportTo(corridorAirlockCenter.north(2).getX() + offsetPos.x() + 0.5f, corridorAirlockCenter.north(2).getY() + offsetPos.y() + 0.5f, corridorAirlockCenter.north(2).getZ() + offsetPos.z() + 0.5f);
+                        });
+                    }
+
+                    if (airlockTimerSeconds == 14) {
+                        airlockTimerSeconds = 0;
+                        this.processingWarping = false;
+                        this.airlockTimerSeconds = 20;
                         BlockPos desktopDoorPos = corridorAirlockCenter.north(2);
                         if (level.getBlockEntity(desktopDoorPos) instanceof BulkHeadDoorBlockEntity bulkHeadDoorBlockEntity) {
-                            bulkHeadDoorBlockEntity.closeDoor(level, desktopDoorPos, level.getBlockState(desktopDoorPos));
-                            level.setBlock(desktopDoorPos, level.getBlockState(desktopDoorPos).setValue(BulkHeadDoorBlock.LOCKED, true), 2);
+                            bulkHeadDoorBlockEntity.openDoor(level, desktopDoorPos, level.getBlockState(desktopDoorPos));
+                            level.setBlock(desktopDoorPos, level.getBlockState(desktopDoorPos).setValue(BulkHeadDoorBlock.LOCKED, false), 2);
                         }
 
                         BlockPos corridorDoorBlockPos = new BlockPos(1000,100,2);
                         if (level.getBlockEntity(corridorDoorBlockPos) instanceof BulkHeadDoorBlockEntity bulkHeadDoorBlockEntity) {
-                            bulkHeadDoorBlockEntity.closeDoor(level, corridorDoorBlockPos, level.getBlockState(corridorDoorBlockPos));
-                            level.setBlock(corridorDoorBlockPos, level.getBlockState(corridorDoorBlockPos).setValue(BulkHeadDoorBlock.LOCKED, true), 2);
+                            bulkHeadDoorBlockEntity.openDoor(level, corridorDoorBlockPos, level.getBlockState(corridorDoorBlockPos));
+                            level.setBlock(corridorDoorBlockPos, level.getBlockState(corridorDoorBlockPos).setValue(BulkHeadDoorBlock.LOCKED, false), 2);
                         }
                     }
-                } else {
-                    this.processingWarping = false;
-                    this.airlockCountdownSeconds = 6;
-                    this.airlockTimerSeconds = 0;
+
+
+                    airlockTimerSeconds++;
                 }
-
-            }
-        }
-
-        if (processingWarping) {
-            if (level.getGameTime() % 20 == 0) {
-                if (airlockTimerSeconds == 2) {
-                    level.playSound(null, corridorAirlockCenter, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 5, 0.25f);
-                    level.playSound(null, staticCorridorCenter, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 5, 0.25f);
-                }
-
-                if (airlockTimerSeconds == 10) {
-                    List<LivingEntity> desktopEntities = level.getEntitiesOfClass(LivingEntity.class, new AABB(corridorAirlockCenter.north(2).west(2), corridorAirlockCenter.south(2).east(2).above(4)));
-                    List<LivingEntity> corridorEntities = level.getEntitiesOfClass(LivingEntity.class, new AABB(staticCorridorCenter.north(2).west(2), staticCorridorCenter.south(2).east(2).above(4)));
-
-                    desktopEntities.forEach(x -> {
-                        Vec3 offsetPos = x.position().subtract(Vec3.atCenterOf(corridorAirlockCenter.north(2))) ;
-                        x.teleportTo(1000.5f + offsetPos.x(), 100.5f + offsetPos.y(), -1.5f + offsetPos.z());
-                    });
-
-                    corridorEntities.forEach(x -> {
-                        Vec3 offsetPos = x.position().subtract(Vec3.atCenterOf(new BlockPos(1000, 100, -2))) ;
-                        x.teleportTo(corridorAirlockCenter.north(2).getX() + offsetPos.x() + 0.5f, corridorAirlockCenter.north(2).getY() + offsetPos.y() + 0.5f, corridorAirlockCenter.north(2).getZ() + offsetPos.z() + 0.5f);
-                    });
-                }
-
-                if (airlockTimerSeconds == 14) {
-                    airlockTimerSeconds = 0;
-                    this.processingWarping = false;
-                    this.airlockTimerSeconds = 20;
-                    BlockPos desktopDoorPos = corridorAirlockCenter.north(2);
-                    if (level.getBlockEntity(desktopDoorPos) instanceof BulkHeadDoorBlockEntity bulkHeadDoorBlockEntity) {
-                        bulkHeadDoorBlockEntity.openDoor(level, desktopDoorPos, level.getBlockState(desktopDoorPos));
-                        level.setBlock(desktopDoorPos, level.getBlockState(desktopDoorPos).setValue(BulkHeadDoorBlock.LOCKED, false), 2);
-                    }
-
-                    BlockPos corridorDoorBlockPos = new BlockPos(1000,100,2);
-                    if (level.getBlockEntity(corridorDoorBlockPos) instanceof BulkHeadDoorBlockEntity bulkHeadDoorBlockEntity) {
-                        bulkHeadDoorBlockEntity.openDoor(level, corridorDoorBlockPos, level.getBlockState(corridorDoorBlockPos));
-                        level.setBlock(corridorDoorBlockPos, level.getBlockState(corridorDoorBlockPos).setValue(BulkHeadDoorBlock.LOCKED, false), 2);
-                    }
-                }
-
-
-                airlockTimerSeconds++;
             }
         }
     }
