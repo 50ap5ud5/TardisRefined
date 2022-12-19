@@ -59,7 +59,7 @@ public abstract class ShellBaseBlockEntity extends BlockEntity implements IExter
 
     public void onAttemptEnter(BlockState blockState, Level level, BlockPos blockPos, Player player) {
         if (level instanceof ServerLevel serverLevel) {
-            ServerLevel interior = DimensionHandler.getOrCreateInterior(level, new ResourceLocation(TardisRefined.MODID, this.id.toString()));
+            ServerLevel interior = DimensionHandler.getOrCreateInterior(new ResourceLocation(TardisRefined.MODID, this.id.toString()));
             TardisLevelOperator.get(interior).ifPresent(cap -> {
                 if (cap.isTardisReady() && blockState.getValue(ShellBaseBlock.OPEN)) {
                     cap.enterTardis(this, player, blockPos, serverLevel, blockState.getValue(ShellBaseBlock.FACING));

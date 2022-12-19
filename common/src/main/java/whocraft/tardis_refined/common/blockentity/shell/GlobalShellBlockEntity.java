@@ -17,7 +17,7 @@ public class GlobalShellBlockEntity extends ShellBaseBlockEntity{
 
     public void onRightClick(BlockState blockState) {
         if (getLevel() instanceof ServerLevel serverLevel) {
-            ServerLevel interior = DimensionHandler.getExistingLevel(serverLevel, id.toString());
+            ServerLevel interior = DimensionHandler.getExistingLevel(id.toString());
             if (interior != null) {
                 TardisLevelOperator.get(interior).ifPresent(cap -> {
                     cap.setDoorClosed(blockState.getValue(GlobalShellBlock.OPEN));

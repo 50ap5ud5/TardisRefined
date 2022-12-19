@@ -1,11 +1,8 @@
 package whocraft.tardis_refined.common.dimension;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -13,10 +10,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.LevelStem;
 import whocraft.tardis_refined.TardisRefined;
+import whocraft.tardis_refined.common.util.Platform;
 import whocraft.tardis_refined.common.world.chunk.TardisChunkGenerator;
 import whocraft.tardis_refined.registry.DimensionTypes;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Map;
 
 /*
@@ -26,25 +25,27 @@ import java.util.Map;
 
 public class DimensionHandler {
 
-    public static ServerLevel getOrCreateInterior(Level interactionLevel, ResourceLocation resourceLocation) {
+    public static ArrayList<ResourceKey<Level>> LEVELS = new ArrayList<>();
 
-        if (interactionLevel instanceof ServerLevel serverLevel) {
-           ResourceKey<Level> levelResourceKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceLocation);
-           ServerLevel existingLevel = getExistingLevel(serverLevel, levelResourceKey);
+    public ArrayList<ResourceKey<Level>> getLevels() {
+        return LEVELS;
+    }
 
-           if (existingLevel != null) {
-               return existingLevel;
-           }
+    public static ServerLevel getOrCreateInterior(ResourceLocation resourceLocation) {
 
-            return createDimension(interactionLevel, levelResourceKey);
+        ResourceKey<Level> levelResourceKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceLocation);
+        ServerLevel existingLevel = getExistingLevel(levelResourceKey);
+
+        if (existingLevel != null) {
+            return existingLevel;
         }
 
-        return null;
+        return createDimension(levelResourceKey);
 
     }
 
     @ExpectPlatform
-    public static ServerLevel createDimension(Level level, ResourceKey<Level> id) {
+    public static ServerLevel createDimension(ResourceKey<Level> id) {
         throw new AssertionError(TardisRefined.PLATFORM_ERROR);
     }
 
@@ -55,12 +56,12 @@ public class DimensionHandler {
     }
 
 
-    public static ServerLevel getExistingLevel(ServerLevel serverLevel, String id) {
-        return getExistingLevel(serverLevel, ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(TardisRefined.MODID, id)));
+    public static ServerLevel getExistingLevel(String id) {
+        return getExistingLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(TardisRefined.MODID, id)));
     }
 
-    public static ServerLevel getExistingLevel(ServerLevel serverLevel, ResourceKey<Level> levelResourceKey) {
-        Map<ResourceKey<Level>, ServerLevel> levelMap = serverLevel.getServer().levels;
+    public static ServerLevel getExistingLevel(ResourceKey<Level> levelResourceKey) {
+        Map<ResourceKey<Level>, ServerLevel> levelMap = Platform.getServer().levels;
         @Nullable ServerLevel existingLevel = levelMap.get(levelResourceKey);
         return existingLevel;
     }

@@ -118,5 +118,7 @@ public class TardisChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void addDebugScreenInfo(List<String> p_223175_, RandomState p_223176_, BlockPos p_223177_) {}
+    public void addDebugScreenInfo(List<String> info, RandomState random, BlockPos pos) {
+
+    }
 }
