@@ -46,8 +46,7 @@ public class TardisChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void applyBiomeDecoration(WorldGenLevel pLevel, ChunkAccess pChunk, StructureManager pStructureManager) {
-    }
+    public void applyBiomeDecoration(WorldGenLevel pLevel, ChunkAccess pChunk, StructureManager pStructureManager) {}
 
     @Override
     public void createStructures(RegistryAccess pRegistryAccess, RandomState pRandom, StructureManager pStructureManager, ChunkAccess pChunk, StructureTemplateManager pStructureTemplateManager, long pSeed) {
@@ -71,11 +70,7 @@ public class TardisChunkGenerator extends ChunkGenerator {
 
     @Override
     public void buildSurface(WorldGenRegion level, StructureManager structureManager, RandomState random, ChunkAccess chunk) {
-        BlockPos cornerPos = new BlockPos(chunk.getPos().getMinBlockX(), chunk.getMinBuildHeight() + 75, chunk.getPos().getMinBlockZ());
-        BlockPos lastCornerPos = new BlockPos(chunk.getPos().getMaxBlockX(), chunk.getMaxBuildHeight() - 75, chunk.getPos().getMaxBlockZ());
-        for (BlockPos pos : BlockPos.betweenClosed(cornerPos, lastCornerPos)) {
-            chunk.setBlockState(pos, Blocks.STONE.defaultBlockState(), true);
-        }
+
     }
 
     @Override
@@ -87,13 +82,13 @@ public class TardisChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender p_223210_, RandomState p_223211_, StructureManager p_223212_, ChunkAccess access) {
-        return CompletableFuture.completedFuture(access);
-    }
-
-    @Override
-    public int getSeaLevel() {
-        return -63;
+    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender p_223210_, RandomState p_223211_, StructureManager p_223212_, ChunkAccess chunk) {
+        BlockPos cornerPos = new BlockPos(chunk.getPos().getMinBlockX(), chunk.getMinBuildHeight() + 75, chunk.getPos().getMinBlockZ());
+        BlockPos lastCornerPos = new BlockPos(chunk.getPos().getMaxBlockX(), chunk.getMaxBuildHeight() - 75, chunk.getPos().getMaxBlockZ());
+        for (BlockPos pos : BlockPos.betweenClosed(cornerPos, lastCornerPos)) {
+            chunk.setBlockState(pos, Blocks.STONE.defaultBlockState(), true);
+        }
+        return CompletableFuture.completedFuture(chunk);
     }
 
     @Override
@@ -102,8 +97,13 @@ public class TardisChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public int getBaseHeight(int p_223032_, int p_223033_, Heightmap.Types p_223034_, LevelHeightAccessor p_223035_, RandomState p_223036_) {
-        return 0;
+    public int getBaseHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
+        return levelHeightAccessor.getMinBuildHeight();
+    }
+
+    @Override
+    public int getSeaLevel() {
+        return -63;
     }
 
     @Override
