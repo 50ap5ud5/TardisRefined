@@ -137,7 +137,7 @@ public class ControlEntity extends PathfinderMob {
                 return true;
             }
         }
-        return super.hurt(damageSource, f);
+        return false;
     }
 
     @Override
